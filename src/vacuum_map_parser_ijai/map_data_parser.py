@@ -301,12 +301,15 @@ class IjaiMapDataParser(MapDataParser):
     @staticmethod
     def _parse_rooms(map_data_rooms: dict[int, Room]) -> None:
         map_id = IjaiMapDataParser.robot_map.mapHead.mapHeadId
+        # While the vacuum is returning to the dock or idle, mapInfo may not
+        # list the current map; the room data below is still valid.
+        current_map = None
         for map_data in IjaiMapDataParser.robot_map.mapInfo:
             if map_data.mapHeadId == map_id:
                 current_map = map_data
                 break
-        map_name = current_map.mapName
-        _LOGGER.debug("map#%d: %s", current_map.mapHeadId, map_name)
+        if current_map is not None:
+            _LOGGER.debug("map#%d: %s", current_map.mapHeadId, current_map.mapName)
         for r in IjaiMapDataParser.robot_map.roomDataInfo:
             if map_data_rooms is not None and r.roomId in map_data_rooms:
                 map_data_rooms[r.roomId].name = r.roomName
